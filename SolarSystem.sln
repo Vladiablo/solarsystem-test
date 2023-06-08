@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SolarSystem", "SolarSystem\SolarSystem.csproj", "{766D9D8B-A1F2-47EF-B334-869D56D0E824}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GLFW.NET", "GLFW.NET\GLFW.NET.csproj", "{48680F0C-83E0-4C19-BFD0-2D35A0BDB62C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenGL.Net_netcore2.2", "OpenGL.Net\OpenGL.Net\OpenGL.Net_netcore2.2.csproj", "{CF69C354-DA4F-48F5-BC89-421FBED74C7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{766D9D8B-A1F2-47EF-B334-869D56D0E824}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{766D9D8B-A1F2-47EF-B334-869D56D0E824}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{766D9D8B-A1F2-47EF-B334-869D56D0E824}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{766D9D8B-A1F2-47EF-B334-869D56D0E824}.Debug|x86.Build.0 = Debug|Any CPU
+		{766D9D8B-A1F2-47EF-B334-869D56D0E824}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{766D9D8B-A1F2-47EF-B334-869D56D0E824}.Release|Any CPU.Build.0 = Release|Any CPU
+		{766D9D8B-A1F2-47EF-B334-869D56D0E824}.Release|x86.ActiveCfg = Release|Any CPU
+		{766D9D8B-A1F2-47EF-B334-869D56D0E824}.Release|x86.Build.0 = Release|Any CPU
+		{48680F0C-83E0-4C19-BFD0-2D35A0BDB62C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48680F0C-83E0-4C19-BFD0-2D35A0BDB62C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48680F0C-83E0-4C19-BFD0-2D35A0BDB62C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{48680F0C-83E0-4C19-BFD0-2D35A0BDB62C}.Debug|x86.Build.0 = Debug|Any CPU
+		{48680F0C-83E0-4C19-BFD0-2D35A0BDB62C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48680F0C-83E0-4C19-BFD0-2D35A0BDB62C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48680F0C-83E0-4C19-BFD0-2D35A0BDB62C}.Release|x86.ActiveCfg = Release|Any CPU
+		{48680F0C-83E0-4C19-BFD0-2D35A0BDB62C}.Release|x86.Build.0 = Release|Any CPU
+		{CF69C354-DA4F-48F5-BC89-421FBED74C7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF69C354-DA4F-48F5-BC89-421FBED74C7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF69C354-DA4F-48F5-BC89-421FBED74C7A}.Debug|x86.ActiveCfg = Debug|x86
+		{CF69C354-DA4F-48F5-BC89-421FBED74C7A}.Debug|x86.Build.0 = Debug|x86
+		{CF69C354-DA4F-48F5-BC89-421FBED74C7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF69C354-DA4F-48F5-BC89-421FBED74C7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF69C354-DA4F-48F5-BC89-421FBED74C7A}.Release|x86.ActiveCfg = Release|x86
+		{CF69C354-DA4F-48F5-BC89-421FBED74C7A}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {569895DE-A07C-4129-8533-5F8B88DA500C}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		OpenGL.Net\Khronos.Net\Khronos.Net.projitems*{cf69c354-da4f-48f5-bc89-421fbed74c7a}*SharedItemsImports = 5
+	EndGlobalSection
+EndGlobal
