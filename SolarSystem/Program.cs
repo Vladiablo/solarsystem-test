@@ -16,8 +16,8 @@ namespace SolarSystem
         static void Main(string[] args)
         {
 #if !DEBUG
-        IntPtr console = Kernel32.GetConsoleWindow();
-        User32.ShowWindow(console, User32.CmdShow.Hide);
+            IntPtr console = Kernel32.GetConsoleWindow();
+            User32.ShowWindow(console, User32.CmdShow.Hide);
 #endif
 
             if (!Glfw.Init())
@@ -37,14 +37,23 @@ namespace SolarSystem
             SimulationSystem simulation = new SimulationSystem();
 
             simulation.AddBody(new Sun(), new Vector<double>(new double[] { 0.0, 0.0, 0.0, 1.0 }));
+            simulation.AddBody(new Mercury(), new Vector<double>(new double[] { 57_910_000_000, 0.0, 0.0, 1.0 }));
+            simulation.AddBody(new Venus(), new Vector<double>(new double[] { 108_000_000_000.0, 0.0, 0.0, 1.0 }));
             simulation.AddBody(new Earth(), new Vector<double>(new double[] { Math.Math.AU, 0.0, 0.0, 1.0 }));
-            IList<BodyBase> bodies = simulation.Bodies;
+            simulation.AddBody(new Moon(), new Vector<double>(new double[] { Math.Math.AU + 384_400_000.0, 0.0, 0.0, 1.0 }));
+
+            simulation.Bodies[1].Velocity = new Vector<double>(new double[] { 0.0, 48_000.0, 0.0, 0.0 });
+            simulation.Bodies[2].Velocity = new Vector<double>(new double[] { 0.0, 35_020.0, 0.0, 0.0 });
+            simulation.Bodies[3].Velocity = new Vector<double>(new double[] { 0.0, 29_765.0, 0.0, 0.0 });
+            simulation.Bodies[4].Velocity = new Vector<double>(new double[] { 0.0, 29_765.0 + 1_023.0, 0.0, 0.0 });
 
             window.MakeCurrent();
+            Glfw.SwapInterval(1);
+
             Gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             SimulationSystemRenderer renderer = new SimulationSystemRenderer(simulation);
 
-            Stopwatch simulationTime = new Stopwatch();
+            Stopwatch timer = new Stopwatch();
             double oldTime = Glfw.Time;
             while (!window.IsClosing)
             {
@@ -52,19 +61,32 @@ namespace SolarSystem
                 double deltaTime = newTime - oldTime;
                 oldTime = newTime;
 
-                simulationTime.Restart();
+                timer.Restart();
                 simulation.Update(deltaTime);
-                simulationTime.Stop();
+                timer.Stop();
+                double simulationTime = (double)timer.ElapsedTicks / (double)Stopwatch.Frequency * 1000.0;
 
-                Console.WriteLine(bodies[1].Velocity);
-                Console.WriteLine($"Simulation Time: { (double) simulationTime.ElapsedTicks / (double) Stopwatch.Frequency * 1000.0 } ms");
+                Console.WriteLine($"Simulation Time: {simulationTime} ms");
 
+                timer.Restart();
                 Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
                 renderer.Render(deltaTime);
 
                 window.SwapBuffers();
+                timer.Stop();
+                double renderingTime = (double)timer.ElapsedTicks / (double)Stopwatch.Frequency * 1000.0;
+                Console.WriteLine($"Rendering Time: {renderingTime} ms");
+
+                timer.Restart();
                 Glfw.PollEvents();
+                timer.Stop();
+
+                double processingEventsTime = (double)timer.ElapsedTicks / (double)Stopwatch.Frequency * 1000.0;
+                Console.WriteLine($"Events Time: {processingEventsTime} ms");
+
+                double frameTime = simulationTime + renderingTime + processingEventsTime;
+                Console.WriteLine($"Total: {frameTime} ms; FPS: {1000.0 / frameTime}");
             }
 
             Glfw.Terminate();

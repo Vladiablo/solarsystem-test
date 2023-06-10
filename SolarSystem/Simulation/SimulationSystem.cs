@@ -14,7 +14,7 @@ namespace SolarSystem.Simulation
         #region Fields
 
         public const double TIME_SCALE_MIN = 1.0e-6;
-        public const double TIME_SCALE_MAX = 1.0e+6;
+        public const double TIME_SCALE_MAX = 1.0e+9;
 
         private DateTime _simulationTime;
         private double _timeScale;
@@ -64,7 +64,7 @@ namespace SolarSystem.Simulation
         /// <summary>
         /// Returns current list of bodies in the simulation;
         /// </summary>
-        public IList<BodyBase> Bodies { get { return _bodies.AsReadOnly(); } }
+        public IReadOnlyList<BodyBase> Bodies { get { return _bodies.AsReadOnly(); } }
 
         #endregion
 
@@ -102,7 +102,12 @@ namespace SolarSystem.Simulation
                 {
                     Vector<double> distance = this._bodies[j].Position - this._bodies[i].Position;
                     Vector<double> forceDirection = Math.Math.NormalizeVector(distance);
-                    double forceMagnitude = Math.Math.G * this._bodies[i].Mass * this._bodies[j].Mass / Vector.Dot(distance, distance);
+
+                    double distanceSquared = Vector.Dot(distance, distance);
+                    if (distanceSquared < Math.Math.NEAR_ZERO)
+                        distanceSquared = Math.Math.NEAR_ZERO;
+
+                    double forceMagnitude = Math.Math.G * this._bodies[i].Mass * this._bodies[j].Mass / distanceSquared;
 
                     this._bodies[i].AddForce(forceDirection *  forceMagnitude);
                     this._bodies[j].AddForce(forceDirection * -forceMagnitude);
@@ -126,8 +131,8 @@ namespace SolarSystem.Simulation
 
         public void Update(double deltaTime)
         {
-            deltaTime *= this._timeScale;
-            double dt = deltaTime / (double)this._solverIterations;
+            double dt = deltaTime * this._timeScale / (double)this._solverIterations;
+
             for (ushort i = 0; i < this._solverIterations; ++i)
             {
                 this.UpdatePositions(dt);

@@ -28,23 +28,27 @@ namespace SolarSystem.Rendering
             Gl.BindVertexArray(this._id);
         }
 
-        public static void Unbind()
+        /// <summary>
+        /// Binds VAO with name 0.
+        /// </summary>
+        public void Unbind()
         {
             Gl.BindVertexArray(0);
         }
 
         /// <summary>
-        /// Binds attribute to specific location of this vertex array.<br/>
-        /// Call Bind() before this!
+        /// Binds attribute to specific location of currently bound vertex array.<br/>
+        /// Call <c>Bind()</c> before this!
         /// </summary>
         /// <param name="index">Index of vertex attribute</param>
         /// <param name="size">Number of components per vertex attribute</param>
         /// <param name="type">Data type of each component in the array</param>
         /// <param name="stride">Byte offset between consecutive vertex attributes</param>
         /// <param name="offset">Offset of the first vertex attribute in the currently bound GL_ARRAY_BUFFER</param>
-        public static void BindAttribute(uint index, int size, VertexAttribType type, int stride, nint offset)
+        public void BindAttribute(uint index, int size, VertexAttribType type, int stride, nint offset)
         {
             Gl.VertexAttribPointer(index, size, type, false, stride, offset);
+            Gl.EnableVertexAttribArray(index);
         }
 
         public void Delete() 

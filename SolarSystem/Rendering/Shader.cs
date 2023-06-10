@@ -7,16 +7,32 @@ using OpenGL;
 
 namespace SolarSystem.Rendering
 {
-    internal class Shader
+    internal class Shader : IAsset
     {
+        #region Fields
+
         private ShaderType _type;
         private uint _id;
         private bool _isDeleted;
-
         private bool _isCompiled;
 
+        #endregion
+
+        #region Properties
+
+        public string AssetId { get; init; }
         public uint Id { get { return _id; } }
         public bool IsCompiled { get { return _isCompiled; } }
+
+        #endregion
+
+        public Shader(ShaderType type)
+        {
+            this._type = type;
+            this._id = Gl.CreateShader(type);
+            this._isDeleted = false;
+            this._isCompiled = false;
+        }
 
         public Shader(string source, ShaderType type)
         {
@@ -39,6 +55,11 @@ namespace SolarSystem.Rendering
             this.Delete();
         }
 
+        public void SetSource(string source) 
+        {
+            Gl.ShaderSource(this._id, new string[] { source });
+        }
+
         public void Compile()
         {
             Gl.CompileShader(this._id);
@@ -49,12 +70,12 @@ namespace SolarSystem.Rendering
                 Gl.GetShader(this._id, ShaderParameterName.InfoLogLength, out int infoLogLength);
 
                 if (infoLogLength <= 0)
-                    throw new Exception("Failed to compile shader");
+                    throw new Exception($"Failed to compile shader {this.AssetId}");
 
                 StringBuilder infoLog = new StringBuilder(infoLogLength);
                 Gl.GetShaderInfoLog(this._id, infoLogLength, out int length, infoLog);
 
-                throw new Exception($"Failed to compile shader. Info Log:\n{infoLog.ToString()}");
+                throw new Exception($"Failed to compile shader {this.AssetId}. Info Log:\n{infoLog.ToString()}");
             }
 
             this._isCompiled = true;
@@ -65,6 +86,16 @@ namespace SolarSystem.Rendering
             if (this._isDeleted) return;
             Gl.DeleteShader(this._id);
             this._isDeleted = true;
+        }
+
+        public static  string GetAssetBaseDir()
+        {
+            return "Shaders/";
+        }
+
+        public void Unload()
+        {
+            this.Delete();
         }
     }
 }

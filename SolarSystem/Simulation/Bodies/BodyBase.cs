@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SolarSystem.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -13,12 +14,19 @@ namespace SolarSystem.Simulation.Bodies
 
         protected string _name;
         protected double _mass;
+        protected double _radius;
+        protected double _distanceFromSun;
 
         // Physics
         protected Vector<double> _position;
         protected Vector<double> _velocity;
         protected Vector<double> _acceleration;
         protected Vector<double> _force;
+
+        // Rendering
+        protected Mesh _mesh;
+        protected Rendering.Program _material;
+        protected Texture[] _textures;
 
         #endregion
 
@@ -33,6 +41,16 @@ namespace SolarSystem.Simulation.Bodies
         /// Represents body mass in kg.
         /// </summary>
         public double Mass { get { return _mass; } }
+
+        /// <summary>
+        /// Represents the radius of the body in meters.
+        /// </summary>
+        public double Radius { get { return _radius; } }
+
+        /// <summary>
+        /// Represents the body's distance from the Sun in m.
+        /// </summary>
+        public double DistanceFromSun { get { return _distanceFromSun; } }
 
         /// <summary>
         /// Represents body position in world space.
@@ -54,6 +72,13 @@ namespace SolarSystem.Simulation.Bodies
         /// </summary>
         public Vector<double> Force { get { return _force; } set { _force = value; } }
 
+
+        public Mesh Mesh { get { return _mesh; } }
+
+        public Rendering.Program Material { get { return _material; } }
+
+        public Texture[] Textures { get { return _textures; } }
+
         #endregion
 
         public BodyBase()
@@ -64,6 +89,8 @@ namespace SolarSystem.Simulation.Bodies
             this._velocity = new Vector<double>(0.0);
             this._acceleration = new Vector<double>(0.0);
             this._force = new Vector<double>(0.0);
+
+            this._textures = new Texture[0];
         }
 
         public void AddForce(Vector<double> force)
@@ -71,6 +98,14 @@ namespace SolarSystem.Simulation.Bodies
             this._force += force;
         }
 
-        
+        public virtual void LoadRenderData()
+        {
+            this._mesh = AssetManager.LoadMesh("sphere.obj");
+            this._mesh.LoadRenderData();
+
+            this._material = AssetManager.LoadProgram("baseColorAttrib");
+            this._material.Link();
+        }
+
     }
 }
