@@ -156,6 +156,19 @@ namespace SolarSystem.Rendering
         /// Call <c>Use()</c> before this!
         /// </summary>
         /// <param name="uniformName">Name of the uniform variable</param>
+        /// <param name="vec">Vector to set uniform with</param>
+        public void SetVector4(string uniformName, System.Numerics.Quaternion quat)
+        {
+            if (!this._uniformLocations.TryGetValue(uniformName, out int location))
+                throw new ArgumentException($"Uniform with name \"{uniformName}\" not found!");
+
+            Gl.Uniform4f(location, 1, quat);
+        }
+
+        /// <summary>
+        /// Call <c>Use()</c> before this!
+        /// </summary>
+        /// <param name="uniformName">Name of the uniform variable</param>
         /// <param name="value">Value to set the uinform with</param>
         public void SetInteger(string uniformName, int value)
         {

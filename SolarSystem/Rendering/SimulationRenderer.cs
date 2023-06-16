@@ -8,65 +8,113 @@ using OpenGL;
 using SolarSystem.Simulation.Bodies;
 using System.Numerics;
 using System.Runtime.Intrinsics;
+using SolarSystem.Math;
+using GLFW;
 
 namespace SolarSystem.Rendering
 {
     internal class SimulationSystemRenderer
     {
-        private SimulationSystem _simulation;
-        private IReadOnlyList<BodyBase> _bodies;
+        private SimulationSystem simulation;
+        private IReadOnlyList<BodyBase> bodies;
 
-        private Camera _camera;
+        private float bodiesScale;
+        private float sunScale;
+
+        private Camera camera;
+
+        public float SunScale
+        {
+            get { return sunScale; }
+            set
+            {
+                if (value < 0.001f) 
+                    throw new ArgumentOutOfRangeException("Sun scale cannot be less that 0.001");
+                sunScale = value;
+            } 
+        }
+
+        public float BodiesScale
+        {
+            get { return bodiesScale; }
+            set
+            {
+                if (value < 0.001f) 
+                    throw new ArgumentOutOfRangeException("Bodies scale cannot be less that 0.001");
+                bodiesScale = value;
+            }
+        }
 
         public Camera Camera 
         { 
-            get { return _camera; } 
-            set { _camera = value; }
+            get { return camera; } 
+            set { camera = value; }
         }
 
-        public SimulationSystemRenderer(SimulationSystem simulation)
+        public SimulationSystemRenderer(SimulationSystem simulation, NativeWindow window)
         {
-            this._simulation = simulation;
-            this._bodies = simulation.Bodies;
+            this.simulation = simulation;
+            this.bodies = simulation.Bodies;
 
-            for (int i = 0; i < this._bodies.Count; ++i)
+            this.sunScale = 1.0f;
+            this.bodiesScale = 10.0f;
+
+            for (int i = 0; i < this.bodies.Count; ++i)
             {
-                this._bodies[i].LoadRenderData();
+                this.bodies[i].LoadRenderData();
             }
 
-            this._camera = new Camera(90.0f, 16.0f / 9.0f, 0.001f, 1.0e12f);
+            this.camera = new Camera(15.0f, 16.0f / 9.0f, 0.1f, 1.0e12f);
 
-            this._simulation.TimeScale = 31_557_600.0 / 16.0;
-            //this._simulation.SolverIterations = 8;
+            window.SizeChanged += WindowSizeChangedCallback;
+        }
+
+        private void WindowSizeChangedCallback(object? sender, SizeChangeEventArgs e)
+        {
+            this.camera.AspectRatio = (float)e.Size.Width / (float)e.Size.Height;
         }
 
         public void Render(double deltaTime)
         {
+            Gl.Enable(EnableCap.DepthTest);
+            Gl.Enable(EnableCap.CullFace);
+            Gl.CullFace(CullFaceMode.Back);
 
-            for (int i = 0; i < this._bodies.Count; ++i)
+            Matrix4x4 proj = this.camera.Projection;
+
+            //this._camera.Position = MathHelper.ConvertDoubleVectorToFloat((this._bodies[0].Position * MathHelper.RENDER_TO_SIMULATION_SCALE)).AsVector128().AsVector3();
+
+            Matrix4x4 view = this.Camera.GetViewMatrix();
+            this.bodies[0].Position = new Vector<double>(0.0);
+            for (int i = 0; i < this.bodies.Count; ++i)
             {
                 Matrix4x4 translation = Matrix4x4.CreateTranslation(
-                    Math.Math.ConvertDoubleVectorToFloat(this._bodies[i].Position * (1.0 / Math.Math.AU))
+                    MathHelper.ConvertDoubleVectorToFloat(this.bodies[i].Position * MathHelper.RENDER_TO_SIMULATION_SCALE)
                     .AsVector128()
                     .AsVector3());
 
-                Matrix4x4 scale = Matrix4x4.CreateScale((float)(this._bodies[i].Radius * Math.Math.RENDER_TO_SIMULATION_SCALE * 1e-3));
+                Matrix4x4 rotation = Matrix4x4.CreateFromYawPitchRoll(0.0f, 0.0f, 0.0f);
+                Matrix4x4 scale = Matrix4x4.CreateScale(
+                    (float)(this.bodies[i].Radius * MathHelper.RENDER_TO_SIMULATION_SCALE) *
+                    (i == 0 ? this.sunScale : this.bodiesScale));
 
-                Matrix4x4 mvp = scale * translation;
+                Matrix4x4 model = scale * rotation * translation;
+                Matrix4x4 mvp = model * view * proj;
 
-                this._bodies[i].Material.Use();
-                this._bodies[i].Material.SetMatrix("mvp", mvp);
+                this.bodies[i].Material.Use();
+                this.bodies[i].Material.SetMatrix("mvp", mvp);
 
-                IReadOnlyList<string> samplers = this._bodies[i].Material.Samplers;
-                int textureCount = System.Math.Min(this._bodies[i].Textures.Length, samplers.Count);
+                IReadOnlyList<string> samplers = this.bodies[i].Material.Samplers;
+                int textureCount = System.Math.Min(this.bodies[i].Textures.Length, samplers.Count);
                 for(int tex = 0; tex < textureCount; ++tex)
                 {
-                    this._bodies[i].Textures[tex].Bind((TextureUnit)(Gl.TEXTURE0 + tex));
-                    this._bodies[i].Material.SetInteger(samplers[tex], tex);
+                    this.bodies[i].Textures[tex].Bind((TextureUnit)(Gl.TEXTURE0 + tex));
+                    this.bodies[i].Material.SetInteger(samplers[tex], tex);
                 }
 
-                this._bodies[i].Mesh.Vao.Bind();
-                Gl.DrawElements(PrimitiveType.Triangles, this._bodies[i].Mesh.IndicesCount, DrawElementsType.UnsignedInt, 0);
+                this.bodies[i].Mesh.Vao.Bind();
+                Gl.DrawElements(PrimitiveType.Triangles, this.bodies[i].Mesh.IndicesCount, DrawElementsType.UnsignedInt, 0);
+                this.bodies[i].Mesh.Vao.Unbind();
             }
        
         }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenGL;
 using SolarSystem.Rendering;
+using SolarSystem.Math;
 
 namespace SolarSystem.Simulation.Bodies
 {
@@ -16,7 +17,7 @@ namespace SolarSystem.Simulation.Bodies
             this._name = "Earth";
             this._mass = 5.9722e24;
             this._radius = 6_371_000.0;
-            this._distanceFromSun = Math.Math.AU;
+            this._distanceFromSun = MathHelper.AU;
         }
 
         public override void LoadRenderData()

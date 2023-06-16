@@ -10,6 +10,7 @@
 	<PropertyGroup>
 		<PublishAot>true</PublishAot>
 		<SelfContained>true</SelfContained>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -34,10 +35,17 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\GLFW.NET\GLFW.NET.csproj" />
+	  <ProjectReference Include="..\ImGui.NET\src\ImGui.NET\ImGui.NET.csproj" />
 	  <ProjectReference Include="..\OpenGL.Net\OpenGL.Net\OpenGL.Net_netstd2.0.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="cimgui.dll">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Fonts\Roboto-Medium.ttf">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="glfw3.dll">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
@@ -71,11 +79,26 @@
 	  <None Update="Shaders\baseColorAttrib.vert">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <None Update="Shaders\imgui.frag">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Shaders\imgui.prog">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Shaders\imgui.vert">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="Textures\earth_day_2k.jpg">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Textures\earth_day_8k.jpg">
 	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Textures\jupiter_2k.jpg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Textures\mars_2k.jpg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Textures\mercury_2k.jpg">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -84,6 +107,9 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Textures\sun_2k.jpg">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="Textures\sun_8k.jpg">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Textures\venus_surface_2k.jpg">

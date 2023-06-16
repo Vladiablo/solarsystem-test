@@ -56,6 +56,12 @@ namespace SolarSystem.Rendering
             Gl.BufferData(this._target, (uint)(Marshal.SizeOf<T>() * data.Length), data, this._usage);
         }
 
+        public void SetData(nint data, uint size)
+        {
+            Gl.BindBuffer(this._target, this._id);
+            Gl.BufferData(this._target, size, data, this._usage);
+        }
+
         public void Delete()
         {
             if (this._isDeleted) return;

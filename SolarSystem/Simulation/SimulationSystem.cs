@@ -101,13 +101,13 @@ namespace SolarSystem.Simulation
                 for (int j = i + 1; j < this._bodies.Count; ++j)
                 {
                     Vector<double> distance = this._bodies[j].Position - this._bodies[i].Position;
-                    Vector<double> forceDirection = Math.Math.NormalizeVector(distance);
+                    Vector<double> forceDirection = Math.MathHelper.NormalizeVector(distance);
 
                     double distanceSquared = Vector.Dot(distance, distance);
-                    if (distanceSquared < Math.Math.NEAR_ZERO)
-                        distanceSquared = Math.Math.NEAR_ZERO;
+                    if (distanceSquared < Math.MathHelper.NEAR_ZERO)
+                        distanceSquared = Math.MathHelper.NEAR_ZERO;
 
-                    double forceMagnitude = Math.Math.G * this._bodies[i].Mass * this._bodies[j].Mass / distanceSquared;
+                    double forceMagnitude = Math.MathHelper.G * this._bodies[i].Mass * this._bodies[j].Mass / distanceSquared;
 
                     this._bodies[i].AddForce(forceDirection *  forceMagnitude);
                     this._bodies[j].AddForce(forceDirection * -forceMagnitude);

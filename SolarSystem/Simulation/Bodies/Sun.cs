@@ -14,7 +14,7 @@ namespace SolarSystem.Simulation.Bodies
         {
             this._name = "Sun";
             this._mass = 1.98847e30;
-            this._radius = 6.9551e8;
+            this._radius = 696_340_000.0;
             this._distanceFromSun = 0.0;
         }
 
@@ -26,8 +26,8 @@ namespace SolarSystem.Simulation.Bodies
             this._material = AssetManager.LoadProgram("baseTexture");
 
             this._textures = new Texture[1];
-            this._textures[0] = AssetManager.LoadTexture2D("sun_2k.jpg");
-            this._textures[0].LoadRenderData(InternalFormat.Rgba, true);
+            this._textures[0] = AssetManager.LoadTexture2D("sun_8k.jpg");
+            this._textures[0].LoadRenderData(InternalFormat.Rgba, true, TextureMagFilter.Linear, TextureMinFilter.Linear);
         }
     }
 }

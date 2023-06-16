@@ -45,9 +45,9 @@ namespace SolarSystem.Rendering
         /// <param name="type">Data type of each component in the array</param>
         /// <param name="stride">Byte offset between consecutive vertex attributes</param>
         /// <param name="offset">Offset of the first vertex attribute in the currently bound GL_ARRAY_BUFFER</param>
-        public void BindAttribute(uint index, int size, VertexAttribType type, int stride, nint offset)
+        public void BindAttribute(uint index, int size, VertexAttribType type, int stride, nint offset, bool normalize = false)
         {
-            Gl.VertexAttribPointer(index, size, type, false, stride, offset);
+            Gl.VertexAttribPointer(index, size, type, normalize, stride, offset);
             Gl.EnableVertexAttribArray(index);
         }
 

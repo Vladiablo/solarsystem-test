@@ -1,5 +1,6 @@
 ﻿using OpenGL;
 using SolarSystem.Rendering;
+using SolarSystem.Math;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace SolarSystem.Simulation.Bodies
             this._name = "Moon";
             this._mass = 7.3477e22;
             this._radius = 1_737_100.0;
-            this._distanceFromSun = Math.Math.AU + 384_400_000.0;
+            this._distanceFromSun = MathHelper.AU + 384_400_000.0;
 
         }
 

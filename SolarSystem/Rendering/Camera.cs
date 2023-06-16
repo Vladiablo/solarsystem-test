@@ -1,4 +1,5 @@
 ﻿using SixLabors.ImageSharp.Processing.Processors.Transforms;
+using SolarSystem.Math;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,8 @@ namespace SolarSystem.Rendering
 
         private Vector3 _position;
         private Vector3 _rotation;
+
+        private float _speed;
 
         public float FovX
         {
@@ -95,12 +98,17 @@ namespace SolarSystem.Rendering
             this._near = near;
             this._far = far;
 
+            this._speed = 10.0f;
+
+            this._position = new Vector3(0.0f, 0.0f, 0.0f);
+            this._rotation = new Vector3(0.0f, 0.0f, 0.0f);
+
             this.RecalculateProjection();
         }
 
         private void RecalculateProjection()
         {
-            this._projection = Matrix4x4.CreatePerspective(this._fovX, this._fovY, this._near, this._far);//Math.Math.CreatePerspectiveMatrix(Math.Math.DegToRad(this._fovY), this._fovX, this._fovY, this._near, this._far);
+            this._projection = Matrix4x4.CreatePerspectiveFieldOfView(MathHelper.DegToRad(this._fovY), this._aspectRatio, this._near, this._far);
         }
 
         public Matrix4x4 GetLookAtMatrix(in Vector3 target)
@@ -110,10 +118,34 @@ namespace SolarSystem.Rendering
 
         public Matrix4x4 GetViewMatrix()
         {
-            Vector3 radians = Math.Math.DegToRad(this._rotation);
-            Matrix4x4 rotation = Matrix4x4.CreateFromYawPitchRoll(radians.Y, radians.X, radians.Z);
+            Vector3 radians = MathHelper.DegToRad(this._rotation);
+
+            Matrix4x4 rotation =
+                Matrix4x4.CreateRotationX(-MathHelper.PI / 2.0f) *
+                Matrix4x4.CreateRotationZ(radians.Y) *
+                Matrix4x4.CreateRotationY(radians.Z) *
+                Matrix4x4.CreateRotationX(radians.X);
+
             Matrix4x4 translation = Matrix4x4.CreateTranslation(-this._position);
-            return rotation * translation;
+
+            return translation * rotation;
+        }
+
+        public void Move(in Vector3 movement)
+        {
+            this._position += movement;
+        }
+
+        public void MoveRelative(in Vector3 movement)
+        {
+            Vector3 radians = MathHelper.DegToRad(this._rotation);
+
+            this._position += Vector3.Transform(movement, Quaternion.CreateFromYawPitchRoll(radians.Y, -radians.X, -radians.Z));
+        }
+
+        public void Rotate(in Vector3 rotation)
+        {
+            this._rotation = MathHelper.NormalizeRotation(this._rotation += rotation);
         }
     }
 }
