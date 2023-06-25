@@ -80,6 +80,7 @@ namespace SolarSystem
             Gl.Get(GetPName.MaxTextureSize, out int maxSize);
             while ((img.Width > maxSize) || (img.Height > maxSize))
             {
+                Console.WriteLine($"Warning! GL Max Texture Size exceeded ({maxSize}). Resizing the texture to fit...");
                 img.Mutate(x => x.Resize(img.Width / 2, img.Height / 2));
                 width /= 2; 
                 height /= 2;
@@ -94,6 +95,36 @@ namespace SolarSystem
             _assets.Add(id, tex);
 
             Console.WriteLine($"Loaded Texture: {id}");
+
+            return tex;
+        }
+
+        public static Texture LoadTextureCubemap(string id, string[] faces)
+        {
+            if (_assets.TryGetValue(id, out IAsset value))
+                return value! as Texture;
+
+            string dir = Path.Combine(Texture.GetAssetBaseDir(), id);
+
+            Texture tex = new Texture(TextureTarget.TextureCubeMap);
+
+            for (int i = 0; i < faces.Length; ++i)
+            {
+                Image<Rgba32> img = Image.Load<Rgba32>(Path.Combine(dir, faces[i]));
+                int width = img.Width;
+                int height = img.Height;
+
+                byte[] pixels = new byte[img.Width * img.Height * 4];
+                img.CopyPixelDataTo(pixels);
+                img.Dispose();
+
+                tex.SetCubeMapFace(PixelFormat.Rgba, InternalFormat.Rgba, i, width, height, pixels);
+            }
+
+            tex.SetCubemapParameters();
+            _assets.Add(id, tex);
+
+            Console.WriteLine($"Loaded CubeMap Texture: {id}");
 
             return tex;
         }

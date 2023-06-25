@@ -85,7 +85,10 @@ namespace SolarSystem.Rendering
         public Vector3 Rotation
         {
             get { return _rotation; }
-            set { this._rotation = value; }
+            set 
+            { 
+                this._rotation = MathHelper.NormalizeRotation(value);
+            }
         }
 
         public Matrix4x4 Projection { get { return _projection; } }

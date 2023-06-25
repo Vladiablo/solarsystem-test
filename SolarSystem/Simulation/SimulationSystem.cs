@@ -1,4 +1,5 @@
-﻿using SolarSystem.Simulation.Bodies;
+﻿using SolarSystem.Math;
+using SolarSystem.Simulation.Bodies;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,14 +14,16 @@ namespace SolarSystem.Simulation
     {
         #region Fields
 
-        public const double TIME_SCALE_MIN = 1.0e-6;
+        public const double TIME_SCALE_MIN = 1.0e-3;
         public const double TIME_SCALE_MAX = 1.0e+9;
 
-        private DateTime _simulationTime;
-        private double _timeScale;
+        private DateTime simulationTime;
+        private DateTime orbitCalculationDate;
+        private double timeScale;
+        private bool simulatePhysics;
 
-        private ushort _solverIterations;
-        private List<BodyBase> _bodies;
+        private ushort solverIterations;
+        private List<BodyBase> bodies;
 
         #endregion
 
@@ -29,20 +32,35 @@ namespace SolarSystem.Simulation
         /// <summary>
         /// Represents current simulation time.
         /// </summary>
-        public DateTime SimulationTime { get { return _simulationTime; } set { _simulationTime = value; } }
+        public DateTime SimulationTime 
+        { 
+            get { return simulationTime; }
+            set 
+            { 
+                simulationTime = value; 
+
+                if (this.simulatePhysics) 
+                {
+                    this.RecalculatePositions();
+                }
+            } 
+        }
+
+        public DateTime OrbitCalculationDate { get { return orbitCalculationDate; } }
+
 
         /// <summary>
         /// Specifies the simulation time scale.
         /// </summary>
         public double TimeScale 
         {
-            get { return _timeScale; }
+            get { return timeScale; }
             set
             {
                 if (value < TIME_SCALE_MIN || value > TIME_SCALE_MAX)
                     throw new ArgumentOutOfRangeException($"TimeScale value is out range! " +
                         $"Valid value should be in range [{TIME_SCALE_MIN}; {TIME_SCALE_MAX}]");
-                _timeScale = value;
+                timeScale = value;
             } 
         }
 
@@ -52,78 +70,99 @@ namespace SolarSystem.Simulation
         /// </summary>
         public ushort SolverIterations 
         {
-            get { return _solverIterations; } 
+            get { return solverIterations; } 
             set 
             {
                 if (value < 1)
                     throw new ArgumentOutOfRangeException("SolverIterations value is out of range! Value should be >= 1");
-                _solverIterations = value;
+                solverIterations = value;
             } 
+        }
+
+        public bool SimulatePhysics 
+        {
+            get { return simulatePhysics; }
+            set { simulatePhysics = value; }
         }
 
         /// <summary>
         /// Returns current list of bodies in the simulation;
         /// </summary>
-        public IReadOnlyList<BodyBase> Bodies { get { return _bodies.AsReadOnly(); } }
+        public IReadOnlyList<BodyBase> Bodies { get { return bodies.AsReadOnly(); } }
 
         #endregion
 
         public SimulationSystem() 
         {
-            this._simulationTime = DateTime.Now;
-            this._timeScale = 1.0;
-            this._solverIterations = 1;
-            this._bodies = new List<BodyBase>();
+            this.simulationTime = DateTime.Now;
+            this.timeScale = 1.0;
+            this.solverIterations = 8;
+            this.simulatePhysics = true;
+            this.bodies = new List<BodyBase>();
         }
 
         #region Private Methods
 
         private void UpdatePositions(double deltaTime)
         {
-            for (int i = 0; i < this._bodies.Count; ++i)
+            for (int i = 1; i < this.bodies.Count; ++i)
             {
                 Vector<double> newPosition = 
-                    this._bodies[i].Position +
-                    this._bodies[i].Velocity * deltaTime +
-                    this._bodies[i].Acceleration * (0.5 * deltaTime * deltaTime);
+                    this.bodies[i].Position +
+                    this.bodies[i].Velocity * deltaTime +
+                    this.bodies[i].Acceleration * (0.5 * deltaTime * deltaTime);
 
-                this._bodies[i].Position = newPosition;
+                this.bodies[i].Position = newPosition;
             }
+        }
+
+        private void RecalculatePositions()
+        {
+            for (int i = 0; i < this.bodies.Count; ++i)
+            {
+                StateVector state = this.bodies[i].CalculateStateVectorAtJD(MathHelper.ToJulianDate(this.simulationTime));
+                this.bodies[i].Position = state.position;
+                if (this.bodies[i].Velocity != state.velocity)
+                    this.bodies[i].Acceleration = this.bodies[i].Velocity - state.velocity;
+                this.bodies[i].Velocity = state.velocity;
+                
+            }
+            this.orbitCalculationDate = this.simulationTime;
         }
 
         private void CalculateForces()
         {
-            for (int i = 0; i < this._bodies.Count; ++i)
-                this._bodies[i].Force = new Vector<double>(0.0);
+            for (int i = 0; i < this.bodies.Count; ++i)
+                this.bodies[i].Force = new Vector<double>(0.0);
 
-            for (int i = 0; i <= this._bodies.Count; ++i)
+            for (int i = 0; i < this.bodies.Count; ++i)
             {
-                for (int j = i + 1; j < this._bodies.Count; ++j)
+                for (int j = i + 1; j < this.bodies.Count; ++j)
                 {
-                    Vector<double> distance = this._bodies[j].Position - this._bodies[i].Position;
-                    Vector<double> forceDirection = Math.MathHelper.NormalizeVector(distance);
+                    Vector<double> distance = this.bodies[j].Position - this.bodies[i].Position;
+                    Vector<double> forceDirection = MathHelper.NormalizeVector(distance);
 
                     double distanceSquared = Vector.Dot(distance, distance);
-                    if (distanceSquared < Math.MathHelper.NEAR_ZERO)
-                        distanceSquared = Math.MathHelper.NEAR_ZERO;
+                    if (distanceSquared < MathHelper.NEAR_ZERO)
+                        distanceSquared = MathHelper.NEAR_ZERO;
 
-                    double forceMagnitude = Math.MathHelper.G * this._bodies[i].Mass * this._bodies[j].Mass / distanceSquared;
+                    double forceMagnitude = MathHelper.G * this.bodies[i].Mass * this.bodies[j].Mass / distanceSquared;
 
-                    this._bodies[i].AddForce(forceDirection *  forceMagnitude);
-                    this._bodies[j].AddForce(forceDirection * -forceMagnitude);
+                    this.bodies[i].AddForce(forceDirection *  forceMagnitude);
+                    this.bodies[j].AddForce(forceDirection * -forceMagnitude);
                 }
             }
         }
 
         private void UpdateVelocities(double deltaTime)
         {
-            for (int i = 0; i < this._bodies.Count; ++i)
+            for (int i = 0; i < this.bodies.Count; ++i)
             {
-                Vector<double> newAcceleration = this._bodies[i].Force / new Vector<double>(this._bodies[i].Mass);
-                Vector<double> newVelocity = this._bodies[i].Velocity + (this._bodies[i].Acceleration + newAcceleration) * (0.5 * deltaTime);
+                Vector<double> newAcceleration = this.bodies[i].Force / new Vector<double>(this.bodies[i].Mass);
+                Vector<double> newVelocity = this.bodies[i].Velocity + (this.bodies[i].Acceleration + newAcceleration) * (0.5 * deltaTime);
 
-                this._bodies[i].Acceleration = newAcceleration;
-                this._bodies[i].Velocity = newVelocity;
+                this.bodies[i].Acceleration = newAcceleration;
+                this.bodies[i].Velocity = newVelocity;
             }
         }
 
@@ -131,27 +170,81 @@ namespace SolarSystem.Simulation
 
         public void Update(double deltaTime)
         {
-            double dt = deltaTime * this._timeScale / (double)this._solverIterations;
+            deltaTime *= this.timeScale;
 
-            for (ushort i = 0; i < this._solverIterations; ++i)
+            try
             {
-                this.UpdatePositions(dt);
-                this.CalculateForces();
-                this.UpdateVelocities(dt);
+                this.simulationTime = this.simulationTime.AddSeconds(deltaTime);
+            }
+            catch (Exception e)
+            {
+                this.simulationTime = new DateTime(0);
             }
 
-            this._simulationTime = this._simulationTime.AddSeconds(deltaTime);
+            if (this.simulatePhysics)
+            {
+                double dt = deltaTime / (double)this.solverIterations;
+                for (ushort i = 0; i < this.solverIterations; ++i)
+                {
+                    this.UpdatePositions(dt);
+                    this.CalculateForces();
+                    this.UpdateVelocities(dt);
+                }
+                return;
+            }
+
+            this.RecalculatePositions();
         }
 
         public void AddBody(BodyBase body)
         {
-            this._bodies.Add(body);
+            this.bodies.Add(body);
         }
 
         public void AddBody(BodyBase body, Vector<double> position)
         {
             body.Position = position;
-            this._bodies.Add(body);
+            this.bodies.Add(body);
+        }
+
+        public void AddBodyAtDefaultPosition(BodyBase body)
+        {
+            double pos = body.OrbitData.semiMajorAxis
+                    * System.Math.Sqrt(1.0 - body.OrbitData.eccentricity * body.OrbitData.eccentricity);
+
+            body.Position = new Vector<double>(new double[] { 0.0, -pos, 0.0, 0.0 });
+            body.Velocity = new Vector<double>(new double[] { body.OrbitalSpeed, 0.0, 0.0, 0.0 });
+            
+            this.bodies.Add(body);
+        }
+
+        public void LoadSolarSystem()
+        {
+            this.bodies.Clear();
+
+            Sun sun = new Sun();
+            Mercury mercury = new Mercury();
+            Venus venus = new Venus();
+            Earth earth = new Earth();
+            Mars mars = new Mars();
+            Jupiter jupiter = new Jupiter();
+            Saturn saturn = new Saturn();
+            Uranus uranus = new Uranus();
+            Neptune neptune = new Neptune();
+            Pluto pluto = new Pluto();
+
+            this.AddBody(sun);
+            this.AddBody(mercury);
+            this.AddBody(venus);
+            this.AddBody(earth);
+            this.AddBody(mars);
+            this.AddBody(jupiter);
+            this.AddBody(saturn);
+            this.AddBody(uranus);
+            this.AddBody(neptune);
+            this.AddBody(pluto);
+
+            this.RecalculatePositions();
         }
     }
 }

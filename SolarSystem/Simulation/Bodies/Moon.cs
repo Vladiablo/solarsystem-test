@@ -13,23 +13,22 @@ namespace SolarSystem.Simulation.Bodies
     {
         public Moon() : base()
         {
-            this._name = "Moon";
-            this._mass = 7.3477e22;
-            this._radius = 1_737_100.0;
-            this._distanceFromSun = MathHelper.AU + 384_400_000.0;
+            this.name = "Луна";
+            this.mass = 7.3477e22;
+            this.radius = 1_737_100.0;
 
         }
 
         public override void LoadRenderData()
         {
-            this._mesh = AssetManager.LoadMesh("sphere.obj");
-            this._mesh.LoadRenderData();
+            this.mesh = AssetManager.LoadMesh("sphere.obj");
+            this.mesh.LoadRenderData();
 
-            this._material = AssetManager.LoadProgram("baseTexture");
+            this.material = AssetManager.LoadProgram("phongNoSpecular");
 
-            this._textures = new Texture[1];
-            this._textures[0] = AssetManager.LoadTexture2D("moon_2k.jpg");
-            this._textures[0].LoadRenderData(InternalFormat.Rgba, true);
+            this.textures = new Texture[1];
+            this.textures[0] = AssetManager.LoadTexture2D("moon_2k.jpg");
+            this.textures[0].LoadRenderData(InternalFormat.Rgba, true);
         }
     }
 }

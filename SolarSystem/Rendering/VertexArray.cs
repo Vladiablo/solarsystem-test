@@ -54,7 +54,7 @@ namespace SolarSystem.Rendering
         public void Delete() 
         {
             if (this._isDeleted) return;
-            Unbind();
+            this.Unbind();
             Gl.DeleteVertexArrays(this._id);
             this._isDeleted = true;
         }

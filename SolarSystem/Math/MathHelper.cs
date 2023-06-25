@@ -14,21 +14,27 @@ namespace SolarSystem.Math
     public static class MathHelper
     {
         public const float PI = 3.14159265358979323846264338327950288f;
+        public const float TAU = PI * 2.0f;
         public const float DEG_TO_RAD = PI / 180.0f;
         public const float RAD_TO_DEG = 180.0f / PI;
 
-        public const double NEAR_ZERO = 1e-3;
+        public const double DEG_TO_RAD64 = (double)PI / 180.0;
+        public const double RAD_TO_DEG64 = 180.0 / (double)PI;
+
+        public const double NEAR_ZERO = 1.0e-3;
         public const double G = 6.67430e-11;
         /// <summary>
         /// Astronomical Unit value in meters.
         /// </summary>
         public const double AU = 149_597_870_700.0;
 
+        public const double J2000 = 2451545.0;
+
         /// <summary>
         /// Simulation values may be too large to fit into regular floats.<br/>
         /// The values must be scaled by this constant before rendering.
         /// </summary>
-        public const double RENDER_TO_SIMULATION_SCALE = 1e-6;
+        public const double RENDER_TO_SIMULATION_SCALE = 1e-9;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector<double> NormalizeVector(in Vector<double> vector)
@@ -56,6 +62,18 @@ namespace SolarSystem.Math
         public static float RadToDeg(float radians)
         {
             return radians * RAD_TO_DEG;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double DegToRad(double degrees)
+        {
+            return degrees * DEG_TO_RAD64;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double RadToDeg(double radians)
+        {
+            return radians * RAD_TO_DEG64;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,6 +111,28 @@ namespace SolarSystem.Math
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double ClampRotation(double angle)
+        {
+            angle %= 360.0;
+
+            if (angle < 0.0)
+                angle += 360.0;
+
+            return angle;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double NormalizeRotation(double angle)
+        {
+            angle = ClampRotation(angle);
+
+            if (angle > 180.0)
+                angle -= 360.0;
+
+            return angle;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 ClampRotation(in Vector3 rotation)
         {
             return new Vector3(
@@ -108,6 +148,20 @@ namespace SolarSystem.Math
                 NormalizeRotation(rotation.X),
                 NormalizeRotation(rotation.Y),
                 NormalizeRotation(rotation.Z));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double ToJulianDate(in DateTime gregorianDate)
+        {
+            int a = (14 - gregorianDate.Month) / 12;
+            int y = gregorianDate.Year + 4800 - a;
+            int m = gregorianDate.Month + 12 * a - 3;
+
+            int jdn = gregorianDate.Day + (153 * m + 2) / 5 + 365 * y + y / 4 - y / 100 + y / 400 - 32045;
+            return (double)jdn
+                + ((double)gregorianDate.Hour - 12.0) / 24.0
+                + (double)gregorianDate.Minute / 1440.0
+                + (double)gregorianDate.Second / 86400.0;
         }
 
     }

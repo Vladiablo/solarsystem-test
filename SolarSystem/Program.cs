@@ -43,10 +43,15 @@ namespace SolarSystem
             Glfw.WindowHint(Hint.OpenglProfile, Profile.Core);
             Glfw.WindowHint(Hint.OpenglForwardCompatible, true);
             Glfw.WindowHint(Hint.Doublebuffer, true);
+            Glfw.WindowHint(Hint.Samples, 4);
             NativeWindow window = new NativeWindow(1280, 720, "Solar System", GLFW.Monitor.None, Window.None);
 
             window.MakeCurrent();
             Glfw.SwapInterval(1);
+            Console.WriteLine($"OpenGL Version: {Gl.GetString(StringName.Version)}");
+            Console.WriteLine($"OpenGL Renderer: {Gl.GetString(StringName.Renderer)}");
+
+            Gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
             nint ctx = ImGui.CreateContext();
             ImGuiIOPtr io = ImGui.GetIO();
@@ -54,16 +59,17 @@ namespace SolarSystem
 
             unsafe
             {
-                ImFontPtr fontPtr = io.Fonts.AddFontFromFileTTF("Fonts/Roboto-Medium.ttf", 14.0f);
+                ImFontPtr fontPtr = io.Fonts.AddFontFromFileTTF("Fonts/Roboto-Medium.ttf", 16.0f);
 
                 ImFontConfig* nativeConfig = ImGuiNative.ImFontConfig_ImFontConfig();
                 nativeConfig->DstFont = fontPtr;
                 ImFontConfigPtr config = new ImFontConfigPtr(nativeConfig);
 
                 config.MergeMode = true;
-                config.SizePixels = 14.0f;
+                config.SizePixels = 16.0f;
 
-                io.Fonts.AddFontFromFileTTF("Fonts/Roboto-Medium.ttf", 14.0f, config, io.Fonts.GetGlyphRangesCyrillic());
+                io.Fonts.AddFontFromFileTTF("Fonts/Roboto-Medium.ttf", 16.0f, config, io.Fonts.GetGlyphRangesCyrillic());
+                io.Fonts.AddFontFromFileTTF("Fonts/Roboto-Medium.ttf", 16.0f, config, io.Fonts.GetGlyphRangesGreek());
                 io.Fonts.Build();
 
                 config.Destroy();
@@ -76,34 +82,18 @@ namespace SolarSystem
             ImGuiBackend.Init(window);
 
             SimulationSystem simulation = new SimulationSystem();
-
             simulation.TimeScale = 31_557_600.0 / 16.0;
-            simulation.SolverIterations = 8;
+            simulation.SolverIterations = 16;
+            simulation.LoadSolarSystem();
 
-            simulation.AddBody(new Sun(), new Vector<double>(new double[] { 0.0, 0.0, 0.0, 1.0 }));
-            simulation.AddBody(new Mercury(), new Vector<double>(new double[] { 57_910_000_000, 0.0, 0.0, 1.0 }));
-            simulation.AddBody(new Venus(), new Vector<double>(new double[] { 108_000_000_000.0, 0.0, 0.0, 1.0 }));
-            simulation.AddBody(new Earth(), new Vector<double>(new double[] { MathHelper.AU, 0.0, 0.0, 1.0 }));
-            simulation.AddBody(new Moon(), new Vector<double>(new double[] { MathHelper.AU + 384_400_000.0, 0.0, 0.0, 1.0 }));
-            simulation.AddBody(new Mars(), new Vector<double>(new double[] { MathHelper.AU * 1.52, 0.0, 0.0, 1.0 }));
-            simulation.AddBody(new Jupiter(), new Vector<double>(new double[] { MathHelper.AU * 5.2, 0.0, 0.0, 1.0 }));
-
-            simulation.Bodies[1].Velocity = new Vector<double>(new double[] { 0.0, 48_000.0, 0.0, 0.0 });
-            simulation.Bodies[2].Velocity = new Vector<double>(new double[] { 0.0, 35_020.0, 0.0, 0.0 });
-            simulation.Bodies[3].Velocity = new Vector<double>(new double[] { 0.0, 29_765.0, 0.0, 0.0 });
-            simulation.Bodies[4].Velocity = new Vector<double>(new double[] { 0.0, 29_765.0 + 1_023.0, 0.0, 0.0 });
-            simulation.Bodies[5].Velocity = new Vector<double>(new double[] { 0.0, 24_130.0, 0.0, 0.0 });
-            simulation.Bodies[6].Velocity = new Vector<double>(new double[] { 0.0, 13_070.0, 0.0, 0.0 });
-
-            Gl.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             SimulationSystemRenderer renderer = new SimulationSystemRenderer(simulation, window);
+            renderer.RealScale = false;
+            renderer.Camera.Position = new Vector3(0.0f, 0.0f, 10000.0f);
+            renderer.Camera.Rotation = new Vector3(90.0f, 0.0f, 0.0f);
+
             SimulationUI ui = new SimulationUI(simulation, renderer);
 
-            //Glfw.SetInputMode(window, InputMode.RawMouseMotion, 1);
-            //Glfw.SetInputMode(window, InputMode.Cursor, (int)CursorMode.Disabled);
-
-            Glfw.GetCursorPosition(window, out double cursorXold, out double cursorYold);
-
+            simulation.SimulationTime = DateTime.Now;
             Stopwatch timer = new Stopwatch();
             double oldTime = Glfw.Time;
             while (!window.IsClosing)
@@ -115,60 +105,60 @@ namespace SolarSystem
                 timer.Restart();
                 simulation.Update(deltaTime);
                 timer.Stop();
-                ui.simulationTime = (float)timer.ElapsedTicks / (float)Stopwatch.Frequency * 1000.0f;
+                float simulationTime = (float)timer.ElapsedTicks / (float)Stopwatch.Frequency * 1000.0f;
 
                 timer.Restart();
                 ImGui.NewFrame();
                 Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-                Glfw.GetCursorPosition(window, out double cursorX, out double cursorY);
-
-                float dx = (float)(cursorXold - cursorX);
-                float dy = (float)(cursorYold - cursorY);
-
-                cursorXold = cursorX;
-                cursorYold = cursorY;
-
-                //renderer.Camera.Rotate(new Vector3(0.0f, -dy / 8.0f, dx / 8.0f));
-
                 if (Glfw.GetKey(window, Keys.W) == InputState.Press) 
                 {
-                    renderer.Camera.MoveRelative(new Vector3(0.0f, 10.0f, 0.0f));                 
+                    renderer.Camera.MoveRelative(new Vector3(0.0f, 100.0f * (float)deltaTime, 0.0f));                 
                 }
 
                 if (Glfw.GetKey(window, Keys.S) == InputState.Press)
                 {
-                    renderer.Camera.MoveRelative(new Vector3(0.0f, -10.0f, 0.0f));   
+                    renderer.Camera.MoveRelative(new Vector3(0.0f, -100.0f * (float)deltaTime, 0.0f));   
                 }
 
                 if (Glfw.GetKey(window, Keys.A) == InputState.Press)
                 {
-                    renderer.Camera.MoveRelative(new Vector3(-10.0f, 0.0f, 0.0f));
+                    renderer.Camera.MoveRelative(new Vector3(-100.0f * (float)deltaTime, 0.0f, 0.0f));
                 }
 
                 if (Glfw.GetKey(window, Keys.D) == InputState.Press)
                 {
-                    renderer.Camera.MoveRelative(new Vector3(10.0f, 0.0f, 0.0f));
+                    renderer.Camera.MoveRelative(new Vector3(100.0f * (float)deltaTime, 0.0f, 0.0f));
+                }
+
+                if (Glfw.GetKey(window, Keys.Space) == InputState.Press)
+                {
+                    renderer.Camera.MoveRelative(new Vector3(0.0f, 0.0f, 100.0f * (float)deltaTime));
+                }
+
+                if (Glfw.GetKey(window, Keys.LeftControl) == InputState.Press)
+                {
+                    renderer.Camera.MoveRelative(new Vector3(0.0f, 0.0f, -100.0f * (float)deltaTime));
                 }
 
                 if (Glfw.GetKey(window, Keys.I) == InputState.Press)
                 {
-                    renderer.Camera.Rotate(new Vector3(-1.0f, 0.0f, 0.0f));            
+                    renderer.Camera.Rotate(new Vector3(-10.0f * (float)deltaTime, 0.0f, 0.0f));            
                 }
 
                 if (Glfw.GetKey(window, Keys.K) == InputState.Press)
                 {                 
-                    renderer.Camera.Rotate(new Vector3(1.0f, 0.0f, 0.0f));
+                    renderer.Camera.Rotate(new Vector3(10.0f * (float)deltaTime, 0.0f, 0.0f));
                 }
 
                 if (Glfw.GetKey(window, Keys.J) == InputState.Press)
                 {
-                    renderer.Camera.Rotate(new Vector3(0.0f, 0.0f, -1.0f));
+                    renderer.Camera.Rotate(new Vector3(0.0f, 0.0f, -10.0f * (float)deltaTime));
                 }
 
                 if (Glfw.GetKey(window, Keys.L) == InputState.Press)
                 {
-                    renderer.Camera.Rotate(new Vector3(0.0f, 0.0f, 1.0f));
+                    renderer.Camera.Rotate(new Vector3(0.0f, 0.0f, 10.0f * (float)deltaTime));
                 }
 
                 //if (Glfw.GetKey(window, Keys.Q) == InputState.Press)
@@ -181,16 +171,6 @@ namespace SolarSystem
                 //    renderer.Camera.Rotate(new Vector3(0.0f, -1.0f, 0.0f));
                 //}
 
-                if (Glfw.GetKey(window, Keys.Space) == InputState.Press)
-                {
-                    renderer.Camera.MoveRelative(new Vector3(0.0f, 0.0f, 10.0f));
-                }
-
-                if (Glfw.GetKey(window, Keys.LeftControl) == InputState.Press)
-                {
-                    renderer.Camera.MoveRelative(new Vector3(0.0f, 0.0f, -10.0f));
-                }
-
                 renderer.Render(deltaTime);
 
                 ui.SubmitUI();
@@ -200,6 +180,7 @@ namespace SolarSystem
 
                 window.SwapBuffers();
                 timer.Stop();
+                ui.simulationTime = simulationTime;
                 ui.renderingTime = (float)timer.ElapsedTicks / (float)Stopwatch.Frequency * 1000.0f;
 
                 Glfw.PollEvents();

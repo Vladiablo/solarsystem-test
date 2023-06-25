@@ -131,12 +131,80 @@ namespace SolarSystem.Rendering
         /// </summary>
         /// <param name="uniformName">Name of the uniform variable</param>
         /// <param name="mat">Matrix to set uniform with</param>
-        public void SetMatrix(string uniformName, Matrix4x4 mat)
+        public void SetMatrix3(string uniformName, Matrix3x3f mat)
+        {
+            if (!this._uniformLocations.TryGetValue(uniformName, out int location))
+                throw new ArgumentException($"Uniform with name \"{uniformName}\" not found!");
+
+            Gl.UniformMatrix3f(location, 1, false, mat);
+        }
+
+        /// <summary>
+        /// Call <c>Use()</c> before this!
+        /// </summary>
+        /// <param name="uniformName">Name of the uniform variable</param>
+        /// <param name="mat">Matrix to set uniform with</param>
+        public bool TrySetMatrix3(string uniformName, Matrix3x3f mat)
+        {
+            if (!this._uniformLocations.TryGetValue(uniformName, out int location))
+                return false;
+
+            Gl.UniformMatrix3f(location, 1, false, mat);
+            return true;
+        }
+
+        /// <summary>
+        /// Call <c>Use()</c> before this!
+        /// </summary>
+        /// <param name="uniformName">Name of the uniform variable</param>
+        /// <param name="mat">Matrix to set uniform with</param>
+        public void SetMatrix4(string uniformName, Matrix4x4 mat)
         {
             if (!this._uniformLocations.TryGetValue(uniformName, out int location))
                 throw new ArgumentException($"Uniform with name \"{uniformName}\" not found!");
 
             Gl.UniformMatrix4f(location, 1, false, mat);
+        }
+
+        /// <summary>
+        /// Call <c>Use()</c> before this!
+        /// </summary>
+        /// <param name="uniformName">Name of the uniform variable</param>
+        /// <param name="mat">Matrix to set uniform with</param>
+        public bool TrySetMatrix4(string uniformName, Matrix4x4 mat)
+        {
+            if (!this._uniformLocations.TryGetValue(uniformName, out int location))
+                return false;
+
+            Gl.UniformMatrix4f(location, 1, false, mat);
+            return true;
+        }
+
+        /// <summary>
+        /// Call <c>Use()</c> before this!
+        /// </summary>
+        /// <param name="uniformName">Name of the uniform variable</param>
+        /// <param name="vec">Vector to set uniform with</param>
+        public void SetVector3(string uniformName, Vector3 vec)
+        {
+            if (!this._uniformLocations.TryGetValue(uniformName, out int location))
+                throw new ArgumentException($"Uniform with name \"{uniformName}\" not found!");
+
+            Gl.Uniform3f(location, 1, vec);
+        }
+
+        /// <summary>
+        /// Call <c>Use()</c> before this!
+        /// </summary>
+        /// <param name="uniformName">Name of the uniform variable</param>
+        /// <param name="vec">Vector to set uniform with</param>
+        public bool TrySetVector3(string uniformName, Vector3 vec)
+        {
+            if (!this._uniformLocations.TryGetValue(uniformName, out int location))
+                return false;
+
+            Gl.Uniform3f(location, 1, vec);
+            return true;
         }
 
         /// <summary>
@@ -157,12 +225,13 @@ namespace SolarSystem.Rendering
         /// </summary>
         /// <param name="uniformName">Name of the uniform variable</param>
         /// <param name="vec">Vector to set uniform with</param>
-        public void SetVector4(string uniformName, System.Numerics.Quaternion quat)
+        public bool TrySetVector4(string uniformName, Vector4 vec)
         {
             if (!this._uniformLocations.TryGetValue(uniformName, out int location))
-                throw new ArgumentException($"Uniform with name \"{uniformName}\" not found!");
+                return false;
 
-            Gl.Uniform4f(location, 1, quat);
+            Gl.Uniform4f(location, 1, vec);
+            return true;
         }
 
         /// <summary>

@@ -26,12 +26,8 @@ namespace SolarSystem.Rendering
             List<Vector3> vertices = new List<Vector3>(this._initialCapacity);
             List<Vector3> normals = new List<Vector3>(this._initialCapacity);
             List<Vector2> texCoords = new List<Vector2>(this._initialCapacity);
+            List<int> faces = new List<int>(this._initialCapacity * 9);
 
-            Vector3[] normalsUnpacked = null;
-            Vector2[] texCoordsUnpacked = null;
-            List<uint> indices = new List<uint>(this._initialCapacity * 3);
-
-            bool arraysAllocated = false;
             while (!reader.EndOfStream)
             {
                 string? line = reader.ReadLine();
@@ -39,7 +35,6 @@ namespace SolarSystem.Rendering
                     break;
 
                 string[] values = line.Split(' ');
-
                 switch(values[0])
                 {
                     case "v":
@@ -67,30 +62,23 @@ namespace SolarSystem.Rendering
                         texCoords.Add(new Vector2
                         (
                             float.Parse(values[1]),
-                            float.Parse(values[2])
+                            1.0f - float.Parse(values[2])
                         ));
                         break;
                     }
                     case "f":
                     {
-                        if (!arraysAllocated)
-                        {
-                            normalsUnpacked = new Vector3[vertices.Count];
-                            texCoordsUnpacked = new Vector2[vertices.Count];
-                            arraysAllocated = true;
-                        }
-
                         for (int i = 1; i < 4; ++i)
                         {
                             string[] indexTuple = values[i].Split('/');
 
-                            int index = int.Parse(indexTuple[0]) - 1;
+                            int vertIndex = int.Parse(indexTuple[0]) - 1;
                             int texIndex = int.Parse(indexTuple[1]) - 1;
                             int normalIndex = int.Parse(indexTuple[2]) - 1;
 
-                            indices.Add((uint)index);
-                            texCoordsUnpacked[index] = texCoords[texIndex];
-                            normalsUnpacked[index] = normals[normalIndex];
+                            faces.Add(vertIndex);
+                            faces.Add(texIndex);
+                            faces.Add(normalIndex);
                         }
                         break;
                     }
@@ -104,7 +92,22 @@ namespace SolarSystem.Rendering
 
             }
 
-            return new Mesh(vertices.ToArray(), normalsUnpacked, texCoordsUnpacked, indices.ToArray()) { AssetId = assetId };
+            Vector3[] verticesUnpacked = new Vector3[faces.Count / 3];
+            Vector2[] texCoordsUnpacked = new Vector2[faces.Count / 3];
+            Vector3[] normalsUnpacked = new Vector3[faces.Count / 3];
+
+            uint[] indices = new uint[faces.Count / 3];
+
+            for (int i = 0; i < indices.Length; ++i)
+            {
+                int index = i * 3;
+                verticesUnpacked[i] = vertices[faces[index]];
+                texCoordsUnpacked[i] = texCoords[faces[index + 1]];
+                normalsUnpacked[i] = normals[faces[index + 2]];
+                indices[i] = (uint)i;
+            }
+
+            return new Mesh(verticesUnpacked, normalsUnpacked, texCoordsUnpacked, indices) { AssetId = assetId };
         }
     }
 }
