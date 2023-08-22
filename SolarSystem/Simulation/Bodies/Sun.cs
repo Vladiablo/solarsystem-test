@@ -50,7 +50,7 @@ namespace SolarSystem.Simulation.Bodies
             this.material = AssetManager.LoadProgram("baseTexture");
 
             this.textures = new Texture[1];
-            this.textures[0] = AssetManager.LoadTexture2D("sun_8k.jpg");
+            this.textures[0] = AssetManager.LoadTexture2D("sun_2k.jpg");
             this.textures[0].LoadRenderData(InternalFormat.Rgba, true, TextureMagFilter.Linear, TextureMinFilter.Linear);
         }
     }

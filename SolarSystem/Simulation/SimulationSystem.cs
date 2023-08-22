@@ -20,6 +20,7 @@ namespace SolarSystem.Simulation
         private DateTime simulationTime;
         private DateTime orbitCalculationDate;
         private double timeScale;
+        private bool isPaused;
         private bool simulatePhysics;
 
         private ushort solverIterations;
@@ -64,6 +65,8 @@ namespace SolarSystem.Simulation
             } 
         }
 
+        public bool IsPaused { get { return isPaused; } set { isPaused = value; } }
+
         /// <summary>
         /// Specifies the number of iterations in the simulation loop.<br/>
         /// Higher values result in more accurate results, but take more time to simulate.
@@ -81,8 +84,13 @@ namespace SolarSystem.Simulation
 
         public bool SimulatePhysics 
         {
-            get { return simulatePhysics; }
-            set { simulatePhysics = value; }
+            get { return this.simulatePhysics; }
+            set 
+            {
+                this.simulatePhysics = value;
+                for (int i = 0; i < this.bodies.Count; ++i)
+                    this.bodies[i].Acceleration = new Vector<double>(0.0);
+            }
         }
 
         /// <summary>
@@ -96,7 +104,7 @@ namespace SolarSystem.Simulation
         {
             this.simulationTime = DateTime.Now;
             this.timeScale = 1.0;
-            this.solverIterations = 8;
+            this.solverIterations = 16;
             this.simulatePhysics = true;
             this.bodies = new List<BodyBase>();
         }
@@ -122,7 +130,7 @@ namespace SolarSystem.Simulation
             {
                 StateVector state = this.bodies[i].CalculateStateVectorAtJD(MathHelper.ToJulianDate(this.simulationTime));
                 this.bodies[i].Position = state.position;
-                if (this.bodies[i].Velocity != state.velocity)
+                if (this.bodies[i].Velocity != state.velocity && !this.simulatePhysics)
                     this.bodies[i].Acceleration = this.bodies[i].Velocity - state.velocity;
                 this.bodies[i].Velocity = state.velocity;
                 
@@ -170,6 +178,8 @@ namespace SolarSystem.Simulation
 
         public void Update(double deltaTime)
         {
+            if (this.isPaused) return;
+
             deltaTime *= this.timeScale;
 
             try

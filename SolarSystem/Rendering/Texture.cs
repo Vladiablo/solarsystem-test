@@ -173,7 +173,7 @@ namespace SolarSystem.Rendering
                 Gl.Extensions extensions = new Gl.Extensions();
                 extensions.Query();
 
-                if (!extensions.TextureFilterAnisotropic_ARB)
+                if (!extensions.TextureFilterAnisotropic_EXT && !extensions.TextureFilterAnisotropic_ARB)
                 {
                     Console.WriteLine("Warning! Anisotropic filter is not supported on this platform");
                     return;

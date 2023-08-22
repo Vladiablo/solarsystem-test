@@ -123,7 +123,7 @@ namespace SolarSystem.Simulation.Bodies
             this.material = AssetManager.LoadProgram("phongNoSpecular");
 
             this.textures = new Texture[1];
-            this.textures[0] = AssetManager.LoadTexture2D("venus_atmosphere_4k.jpg");
+            this.textures[0] = AssetManager.LoadTexture2D("venus_atmosphere_2k.jpg");
             this.textures[0].LoadRenderData(InternalFormat.Rgba, true, TextureMagFilter.Linear, TextureMinFilter.Linear);
         }
     }

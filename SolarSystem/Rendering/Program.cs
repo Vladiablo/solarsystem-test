@@ -247,6 +247,33 @@ namespace SolarSystem.Rendering
             Gl.Uniform1i(location, 1, value);
         }
 
+        /// <summary>
+        /// Call <c>Use()</c> before this!
+        /// </summary>
+        /// <param name="uniformName">Name of the uniform variable</param>
+        /// <param name="value">Value to set uniform with</param>
+        public void SetFloat(string uniformName, float value)
+        {
+            if (!this._uniformLocations.TryGetValue(uniformName, out int location))
+                throw new ArgumentException($"Uniform with name \"{uniformName}\" not found!");
+
+            Gl.Uniform1f(location, 1, value);
+        }
+
+        /// <summary>
+        /// Call <c>Use()</c> before this!
+        /// </summary>
+        /// <param name="uniformName">Name of the uniform variable</param>
+        /// <param name="value">Value to set uniform with</param>
+        public bool TrySetFloat(string uniformName, float value)
+        {
+            if (!this._uniformLocations.TryGetValue(uniformName, out int location))
+                return false;
+
+            Gl.Uniform1f(location, 1, value);
+            return true;
+        }
+
         public void Delete()
         {
             if (this._isDeleted) return;

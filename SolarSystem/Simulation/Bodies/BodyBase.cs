@@ -377,7 +377,6 @@ namespace SolarSystem.Simulation.Bodies
             this.mesh.LoadRenderData();
 
             this.material = AssetManager.LoadProgram("baseColorAttrib");
-            this.material.Link();
         }
 
     }

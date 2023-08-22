@@ -123,11 +123,17 @@ namespace SolarSystem.Simulation.Bodies
             this.mesh = AssetManager.LoadMesh("sphere.obj");
             this.mesh.LoadRenderData();
 
-            this.material = AssetManager.LoadProgram("phongNoSpecular");
+            this.material = AssetManager.LoadProgram("earth");
 
-            this.textures = new Texture[1];
+            this.textures = new Texture[3];
             this.textures[0] = AssetManager.LoadTexture2D("earth_day_8k.jpg");
-            this.textures[0].LoadRenderData(InternalFormat.Rgba, true, TextureMagFilter.Linear, TextureMinFilter.Linear);
+            this.textures[0].LoadRenderData(InternalFormat.Rgba, true, TextureMagFilter.Linear, TextureMinFilter.Linear, 16.0f);
+
+            this.textures[1] = AssetManager.LoadTexture2D("earth_night_8k.jpg");
+            this.textures[1].LoadRenderData(InternalFormat.Rgba, true, TextureMagFilter.Linear, TextureMinFilter.Linear, 16.0f);
+
+            this.textures[2] = AssetManager.LoadTexture2D("earth_specular_2k.tif");
+            this.textures[2].LoadRenderData(InternalFormat.Rgba, true, TextureMagFilter.Linear, TextureMinFilter.Linear);
         }
     }
 }

@@ -30,6 +30,7 @@ namespace SolarSystem
 
         private bool drawBodyNames;
         private string simulationTimeEntry;
+        private bool simulationPausedEntry;
         private double simulationSpeedEntry;
         private bool simulatePhysicsEntry;
         private int simulationIterationsEntry;
@@ -131,6 +132,12 @@ namespace SolarSystem
                 {
                     this.simulationSpeedEntry = System.Math.Clamp(this.simulationSpeedEntry, SimulationSystem.TIME_SCALE_MIN, SimulationSystem.TIME_SCALE_MAX);
                     this.simulation.TimeScale = this.simulationSpeedEntry;
+                }
+
+                this.simulationPausedEntry = this.simulation.IsPaused;
+                if (ImGui.Checkbox("Пауза", ref this.simulationPausedEntry))
+                {
+                    this.simulation.IsPaused = this.simulationPausedEntry;
                 }
 
                 this.simulatePhysicsEntry = this.simulation.SimulatePhysics;

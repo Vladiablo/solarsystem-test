@@ -25,8 +25,8 @@ namespace SolarSystem
         static void Main(string[] args)
         {
 #if !DEBUG
-            IntPtr console = Kernel32.GetConsoleWindow();
-            User32.ShowWindow(console, User32.CmdShow.Hide);
+            //IntPtr console = Kernel32.GetConsoleWindow();
+            //User32.ShowWindow(console, User32.CmdShow.Hide);
 #endif
 
             Glfw.SetErrorCallback(GlfwError);

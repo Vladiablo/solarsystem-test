@@ -325,9 +325,11 @@ namespace SolarSystem.Rendering
                 body.Material.SetMatrix4("mvp", mvp);
                 body.Material.TrySetMatrix4("model", model);
                 body.Material.TrySetMatrix3("normalMat", normal);
+
                 body.Material.TrySetVector3("lightPos", sunPos);
                 body.Material.TrySetVector3("viewPos", this.camera.Position);
                 body.Material.TrySetVector3("lightColor", new Vector3(1.0f));
+                body.Material.TrySetFloat("shininess", 16.0f);
 
                 IReadOnlyList<string> samplers = body.Material.Samplers;
                 int textureCount = System.Math.Min(body.Textures.Length, samplers.Count);
