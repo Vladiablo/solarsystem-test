@@ -58,7 +58,7 @@ namespace SolarSystem
                 throw new NotImplementedException("Only OBJ files are currently supported");
 
             ObjImporter importer = new ObjImporter(Path.Combine(Mesh.GetAssetBaseDir(), id));
-            Mesh mesh = importer.Import(id);
+            Mesh mesh = importer.Import(id, true);
             _assets.Add(id, mesh);
 
             Console.WriteLine($"Loaded Mesh: {id}");
@@ -85,6 +85,8 @@ namespace SolarSystem
                 width /= 2; 
                 height /= 2;
             }
+
+            img.Mutate(x => x.RotateFlip(RotateMode.None, FlipMode.Vertical));
 
             byte[] pixels = new byte[img.Width * img.Height * 4];
             img.CopyPixelDataTo(pixels);

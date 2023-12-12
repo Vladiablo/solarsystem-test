@@ -243,6 +243,8 @@ namespace SolarSystem.Rendering
             Gl.DepthMask(true);
         }
 
+        static readonly string[] samplerNames = { "baseColor", "nightColor", "specularMap", "normalMap" };
+
         public void Render(double deltaTime)
         {
             Gl.Enable(EnableCap.DepthTest);
@@ -333,10 +335,11 @@ namespace SolarSystem.Rendering
 
                 IReadOnlyList<string> samplers = body.Material.Samplers;
                 int textureCount = System.Math.Min(body.Textures.Length, samplers.Count);
+
                 for(int tex = 0; tex < textureCount; ++tex)
                 {
                     body.Textures[tex].Bind((TextureUnit)(Gl.TEXTURE0 + tex));
-                    body.Material.SetInteger(samplers[tex], tex);
+                    body.Material.SetInteger(samplerNames[tex], tex);
                 }
 
                 body.Mesh.Vao.Bind();

@@ -148,7 +148,7 @@ namespace SolarSystem.Rendering
 
         public void Rotate(in Vector3 rotation)
         {
-            this._rotation = MathHelper.NormalizeRotation(this._rotation += rotation);
+            this._rotation = MathHelper.ClampRotation(this._rotation += rotation);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace SolarSystem.Rendering
             _initialCapacity = initialCapacity;
         }
 
-        public Mesh Import(string assetId)
+        public Mesh Import(string assetId, bool calcTangents = false)
         {
             StreamReader reader = new StreamReader(File.OpenRead(this._path));
 
@@ -62,7 +62,7 @@ namespace SolarSystem.Rendering
                         texCoords.Add(new Vector2
                         (
                             float.Parse(values[1]),
-                            1.0f - float.Parse(values[2])
+                            float.Parse(values[2])
                         ));
                         break;
                     }
@@ -107,7 +107,39 @@ namespace SolarSystem.Rendering
                 indices[i] = (uint)i;
             }
 
-            return new Mesh(verticesUnpacked, normalsUnpacked, texCoordsUnpacked, indices) { AssetId = assetId };
+            Vector3[] tangents = null;
+            if (calcTangents)
+            {
+                tangents = new Vector3[faces.Count / 3];
+
+                for (int i = 0; i < tangents.Length / 3; ++i)
+                {
+                    Vector3 p1 = verticesUnpacked[i * 3];
+                    Vector3 p2 = verticesUnpacked[i * 3 + 1];
+                    Vector3 p3 = verticesUnpacked[i * 3 + 2];
+
+                    Vector2 uv1 = texCoordsUnpacked[i * 3];
+                    Vector2 uv2 = texCoordsUnpacked[i * 3 + 1];
+                    Vector2 uv3 = texCoordsUnpacked[i * 3 + 2];
+
+                    Vector3 e1 = p2 - p1;
+                    Vector3 e2 = p3 - p1;
+                    Vector2 dUv1 = uv2 - uv1;
+                    Vector2 dUv2 = uv3 - uv1;
+
+                    float f = 1.0f / (dUv1.X * dUv2.Y - dUv2.X * dUv1.Y);
+                    tangents[i * 3] = new Vector3
+                    (
+                        f * (dUv2.Y * e1.X - dUv1.Y * e2.X),
+                        f * (dUv2.Y * e1.Y - dUv1.Y * e2.Y),
+                        f * (dUv2.Y * e1.Z - dUv1.Y * e2.Z)
+                    );
+                    tangents[i * 3 + 1] = tangents[i * 3];
+                    tangents[i * 3 + 2] = tangents[i * 3];
+                }
+            }
+
+            return new Mesh(verticesUnpacked, normalsUnpacked, texCoordsUnpacked, tangents, indices) { AssetId = assetId };
         }
     }
 }

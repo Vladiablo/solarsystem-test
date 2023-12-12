@@ -13,6 +13,7 @@ namespace SolarSystem.Rendering
         private Vector3[] _vertices;
         private Vector3[] _normals;
         private Vector2[] _texCoords;
+        private Vector3[] _tangents;
         private uint[] _indices;
 
         private Buffer[] _buffers;
@@ -31,8 +32,20 @@ namespace SolarSystem.Rendering
             this._vertices = vertices;
             this._normals = normals;
             this._texCoords = texCoords;
+            this._tangents = null;
             this._indices = indices;
             this._buffers = new Buffer[4];
+            this._renderDataLoaded = false;
+        }
+
+        public Mesh(Vector3[] vertices, Vector3[] normals, Vector2[] texCoords, Vector3[] tangents, uint[] indices)
+        {
+            this._vertices = vertices;
+            this._normals = normals;
+            this._texCoords = texCoords;
+            this._tangents = tangents;
+            this._indices = indices;
+            this._buffers = new Buffer[5];
             this._renderDataLoaded = false;
         }
 
@@ -67,6 +80,14 @@ namespace SolarSystem.Rendering
 
             this._buffers[3] = new Buffer(BufferTarget.ElementArrayBuffer, BufferUsage.StaticDraw);
             this._buffers[3].SetData(this._indices);
+
+
+            if (this._tangents != null)
+            {
+                this._buffers[4] = new Buffer(BufferTarget.ArrayBuffer, BufferUsage.StaticDraw);
+                this._buffers[4].SetData(this._tangents);
+                this._vao.BindAttribute(3, 3, VertexAttribType.Float, 0, 0);
+            }
 
             this._vao.Unbind();
             this._buffers[2].Unbind();

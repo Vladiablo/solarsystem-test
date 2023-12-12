@@ -125,7 +125,7 @@ namespace SolarSystem.Simulation.Bodies
 
             this.material = AssetManager.LoadProgram("earth");
 
-            this.textures = new Texture[3];
+            this.textures = new Texture[4];
             this.textures[0] = AssetManager.LoadTexture2D("earth_day_8k.jpg");
             this.textures[0].LoadRenderData(InternalFormat.Rgba, true, TextureMagFilter.Linear, TextureMinFilter.Linear, 16.0f);
 
@@ -134,6 +134,9 @@ namespace SolarSystem.Simulation.Bodies
 
             this.textures[2] = AssetManager.LoadTexture2D("earth_specular_2k.tif");
             this.textures[2].LoadRenderData(InternalFormat.Rgba, true, TextureMagFilter.Linear, TextureMinFilter.Linear);
+
+            this.textures[3] = AssetManager.LoadTexture2D("earth_normal_2k.tif");
+            this.textures[3].LoadRenderData(InternalFormat.Rgba, true, TextureMagFilter.Linear, TextureMinFilter.Linear);
         }
     }
 }
