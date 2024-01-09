@@ -143,12 +143,26 @@ namespace SolarSystem.Rendering
         {
             Vector3 radians = MathHelper.DegToRad(this._rotation);
 
-            this._position += Vector3.Transform(movement, Quaternion.CreateFromYawPitchRoll(radians.Y, -radians.X, -radians.Z));
+            Matrix4x4 rotation = MathHelper.CreateRotationMatrix(new Vector3(-radians.X, radians.Y, -radians.Z));
+
+            //Vector3 x = new Vector3(rotation.M11, rotation.M12, rotation.M13);
+            //Vector3 y = new Vector3(rotation.M21, rotation.M22, rotation.M23);
+            //Vector3 z = new Vector3(rotation.M31, rotation.M32, rotation.M33);
+
+            //Vector3 right = Vector3.Normalize(x);
+            //Vector3 forward = Vector3.Normalize(y);
+            //Vector3 up = Vector3.Normalize(z);
+
+            //Console.WriteLine($"Forward: {forward}");
+            //Console.WriteLine($"Right: {right}");
+            //Console.WriteLine($"Up: {up}");
+
+            this._position += Vector3.Transform(movement, rotation);
         }
 
         public void Rotate(in Vector3 rotation)
         {
-            this._rotation = MathHelper.ClampRotation(this._rotation += rotation);
+            this._rotation = MathHelper.NormalizeRotation(this._rotation += rotation);
         }
     }
 }

@@ -151,6 +151,39 @@ namespace SolarSystem.Math
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Matrix4x4 CreateRotationMatrix(in Vector3 rotation)
+        {
+            float sx = MathF.Sin(rotation.X);
+            float sy = MathF.Sin(rotation.Y);
+            float sz = MathF.Sin(rotation.Z);
+            float cx = MathF.Cos(rotation.X);
+            float cy = MathF.Cos(rotation.Y);
+            float cz = MathF.Cos(rotation.Z);
+
+            Matrix4x4 mat = new Matrix4x4()
+            {
+                M11 = cy * cz,
+                M12 = cy * sz,
+                M13 = -sy,
+                M14 = 0.0f,
+                M21 = sx * sy * cz - cx * sz,
+                M22 = sx * sy * sz + cx * cz,
+                M23 = sx * cy,
+                M24 = 0.0f,
+                M31 = cx * sy * cz + sx * sz,
+                M32 = cx * sy * sz - sx * cz,
+                M33 = cx * cy,
+                M34 = 0.0f,
+                M41 = 0.0f,
+                M42 = 0.0f,
+                M43 = 0.0f,
+                M44 = 1.0f,
+            };
+
+            return mat;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double ToJulianDate(in DateTime gregorianDate)
         {
             int a = (14 - gregorianDate.Month) / 12;
